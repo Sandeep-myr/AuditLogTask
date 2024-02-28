@@ -3,7 +3,6 @@ package com.rt.pot.sandeep.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,7 @@ import com.rt.pot.sandeep.error.GlobalException;
 import com.rt.pot.sandeep.model.AuditLogDetails;
 import com.rt.pot.sandeep.request.AuditLogRequest;
 import com.rt.pot.sandeep.request.AuditLogUpdateRequest;
+import com.rt.pot.sandeep.response.Response;
 import com.rt.pot.sandeep.service.AuditLogService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(ConstantsUrl.AuditLogUrl.API_BASE)
 @Tag(name = "Audit Module", description = "Audit Log does 1.Gets All Audit Log Data, 2. Updates Audit Log Data, 3.Save Audit Log  Data etc..")
-public class AuditLogController {
+public class AuditLogController extends BaseController {
 
 	@Autowired
 	private AuditLogService auditLogService;
@@ -43,19 +43,25 @@ public class AuditLogController {
 			@ApiResponse(responseCode = "200", description = "Audit Log Details Are Saved Successfully") })
 
 	@PostMapping(ConstantsUrl.AuditLogUrl.SAVE_AUDIT_LOG_DATA)
-	public ResponseEntity<?> saveAuditResponseDetails(@Valid @RequestBody AuditLogRequest auditLogRequest)
+	public ResponseEntity<Response> saveAuditResponseDetails(@Valid @RequestBody AuditLogRequest auditLogRequest)
 			throws GlobalException {
+
+		Response responseSend = null;
+
 		try {
 			LOGGER.info("saveAuditResponseDetails()");
 			AuditLogDetails response = (AuditLogDetails) this.auditLogService.saveAuditLogData(auditLogRequest);
-			return new ResponseEntity<>(response, HttpStatus.OK);
+			responseSend = new Response(ConstantsUrl.OK, "Details Saved Successfully", response);
+			return getOKResponseEntity(responseSend);
 		} catch (Exception e) {
 			LOGGER.error("Error occurred while saving audit log data: " + e.getMessage());
-			return new ResponseEntity<>("Error occurred while saving audit log data", HttpStatus.INTERNAL_SERVER_ERROR);
+			responseSend = new Response(ConstantsUrl.INTERNAL_SERVER_ERROR,
+					"Error occurred while saving audit log data", null);
+			return getOKResponseEntity(responseSend);
 		}
 	}
 
-	//============================================================================================
+	// ============================================================================================
 
 	// Updating Audit Log Data
 	@Operation(summary = "Updating Audit Log Data", description = "This service is used for updating Audit Log Data.")
@@ -64,36 +70,43 @@ public class AuditLogController {
 	@PutMapping(ConstantsUrl.AuditLogUrl.UPDATE_AUDIT_lOG_DATA)
 	public ResponseEntity<?> updateAuditResponseDetails(@Valid @RequestBody AuditLogUpdateRequest auditLogUpdateRequest)
 			throws GlobalException {
+		Response responseSend = null;
 		try {
 			LOGGER.info("updateAuditResponseDetails()");
-
-			return new ResponseEntity<>(this.auditLogService.updateDetails(auditLogUpdateRequest), HttpStatus.OK);
+			responseSend = new Response(ConstantsUrl.OK, "details updated successfully",
+					this.auditLogService.updateDetails(auditLogUpdateRequest));
+			return getOKResponseEntity(responseSend);
 		} catch (Exception e) {
 			LOGGER.error("Error occurred while updating audit log data: " + e.getMessage());
-			return new ResponseEntity<>("Error occurred while updating audit log data",
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			responseSend = new Response(ConstantsUrl.INTERNAL_SERVER_ERROR,
+					"Error occurred while updating audit log data", null);
+			return getOKResponseEntity(responseSend);
 		}
 	}
 
-	//============================================================================================
+	// ============================================================================================
 
 	// Getting All Audit Log Data
 	@Operation(summary = "Getting All Audit Log Data", description = "This service is used for retrieving all Audit Log Data.")
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Audit Log Details Retrieved Successfully") })
 	@GetMapping(ConstantsUrl.AuditLogUrl.AUDIT_LOG_GET_ALL)
 	public ResponseEntity<?> getAllAuditLogData() {
+		Response responseSend = null;
 		try {
 			LOGGER.info("getAllAuditLogData()");
-
-			return new ResponseEntity<>(this.auditLogService.getAllAuditLogData(), HttpStatus.OK);
+			responseSend = new Response(ConstantsUrl.OK, "All Audit Log Data",
+					this.auditLogService.getAllAuditLogData());
+			return getOKResponseEntity(responseSend);
 		} catch (Exception e) {
 			LOGGER.error("Error occurred while retrieving all audit log data: " + e.getMessage());
-			return new ResponseEntity<>("Error occurred while retrieving all audit log data",
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			responseSend = new Response(ConstantsUrl.INTERNAL_SERVER_ERROR,
+					"Error occurred while retrieving all audit log data", null);
+			return getOKResponseEntity(responseSend);
+
 		}
 	}
 
-	//============================================================================================
+	// ============================================================================================
 
 	// Archiving Audit Log Data by ID
 	@Operation(summary = "Archiving Audit Log Data by ID", description = "This service is used for archiving Audit Log Data by ID.")
@@ -102,18 +115,22 @@ public class AuditLogController {
 
 	@PutMapping(ConstantsUrl.AuditLogUrl.ARCHIVE_AUDIT_LOG_DATA)
 	public ResponseEntity<?> archiveAuditLogData(@PathVariable("id") Long id) throws GlobalException {
+		Response responseSend = null;
 		try {
 			LOGGER.info("archiveAuditLogData()");
 
-			return new ResponseEntity<>(this.auditLogService.archiveAuditLogData(id), HttpStatus.OK);
+			responseSend = new Response(ConstantsUrl.OK, "Archive Audit Log Data",
+					this.auditLogService.archiveAuditLogData(id));
+			return getOKResponseEntity(responseSend);
 		} catch (Exception e) {
 			LOGGER.error("Error occurred while archiving audit log data: " + e.getMessage());
-			return new ResponseEntity<>("Error occurred while archiving audit log data",
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			responseSend = new Response(ConstantsUrl.INTERNAL_SERVER_ERROR,
+					"Error occurred while archiving audit log data", null);
+			return getOKResponseEntity(responseSend);
 		}
 	}
 
-	//============================================================================================
+	// ============================================================================================
 
 	// Getting Single Audit Log Data by ID
 	@Operation(summary = "Getting Single Audit Log Data by ID", description = "This service is used for retrieving a single Audit Log Data by ID.")
@@ -121,14 +138,18 @@ public class AuditLogController {
 			@ApiResponse(responseCode = "200", description = "Audit Log Data Retrieved Successfully") })
 	@GetMapping(ConstantsUrl.AuditLogUrl.GET_SINGLE_AUDIT_LOG_DATA)
 	public ResponseEntity<?> getSingleAuditLogData(@PathVariable("id") Long id) {
+		Response responseSend = null;
 		try {
 			LOGGER.info("getSingleAuditLogData()");
 
-			return new ResponseEntity<>(this.auditLogService.getSingleAuditLogData(id), HttpStatus.OK);
+			responseSend = new Response(ConstantsUrl.OK, "Get Audit Log Data",
+					this.auditLogService.getSingleAuditLogData(id));
+			return getOKResponseEntity(responseSend);
 		} catch (Exception e) {
 			LOGGER.error("Error occurred while retrieving single audit log data: " + e.getMessage());
-			return new ResponseEntity<>("Error occurred while retrieving single audit log data",
-					HttpStatus.INTERNAL_SERVER_ERROR);
+			responseSend = new Response(ConstantsUrl.INTERNAL_SERVER_ERROR,
+					"Error occurred while retrieving single audit log data", null);
+			return getOKResponseEntity(responseSend);
 		}
 	}
 }
