@@ -1,5 +1,8 @@
-
-
+/**
+* @author  Jaya Prakash Manne
+* @version 1.0
+* @since   01-Nov-2019 
+*/
 package com.rt.pot.sandeep.response;
 
 public class Response {
